@@ -4,30 +4,46 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import ie.setu.placemark.databinding.ActivityPlacemarkBinding
-import timber.log.Timber
+import ie.setu.placemark.main.MainApp
+import ie.setu.placemark.models.PlacemarkModel
 import timber.log.Timber.i
+
 
 class PlacemarkActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPlacemarkBinding
+    var placemark = PlacemarkModel()
+    lateinit var app: MainApp
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // enableEdgeToEdge()
+
         binding = ActivityPlacemarkBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        Timber.plant(Timber.DebugTree())
+
+        app = application as MainApp
         i("Placemark Activity started..")
 
         binding.btnAdd.setOnClickListener() {
-            val placemarkTitle = binding.placemarkTitle.text.toString()
-            if (placemarkTitle.isNotEmpty()) {
-                i("add Button Pressed: $placemarkTitle")
+            placemark.title = binding.placemarkTitle.text.toString()
+            placemark.description = binding.placemarkDescription.text.toString()
+
+            if (placemark.title.isNotEmpty() && placemark.description.isNotEmpty()) {
+                app.placemarks.add(placemark.copy())
+                i("Add Button Pressed: $placemark")
+                for ( i in app.placemarks.indices)
+                    { i("Placemark[$i]:${this.app.placemarks[i]}") }
+
+                setResult(RESULT_OK)
+                finish()
+
+                binding.placemarkTitle.text.clear()
+                binding.placemarkDescription.text.clear()
             }
             else {
                 Snackbar
-                    .make(it,"Please Enter a title", Snackbar.LENGTH_LONG)
+                    .make(it,"Please Enter a title and description", Snackbar.LENGTH_LONG)
                     .show()
             }
         }
